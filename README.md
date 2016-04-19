@@ -28,3 +28,18 @@ will deliver an result. We are sorry, but it is out of our hands.
   * PYTHON
   * PYTHON
   * PYTHON
+
+# Development
+Requirements:
+- Python 3.5.1
+- pip
+- virtualenv
+
+Setting up:
+- Create virtualenv `virtualenv -p <path/to/python3.5.1> venv`
+- Write `. venv/bin/activate` to activate the virtual environment
+- pip install -r requirements.txt
+
+Happy hacking!
+
+Note: Remember to deactivate your venv again (with `deactivate`).
