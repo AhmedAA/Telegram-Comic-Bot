@@ -3,13 +3,24 @@ import sys
 import os
 import time
 
-def handle(msg):
-    print("herpderp")
+from pprint import pprint
+
+def on_chat_message(msg):
+    pprint(msg)
+    print(msg['from']['id'])
+    bot.sendMessage(msg['from']['id'], "Stay a while, and listen!")
+
+def on_inline_query(msg):
+    print("inline herp derp")
+
+def on_chosen_inline_result(msg):
+    print("chosen inline herpderp")
 
 
 
-
-# token/bot setup
+###################
+# token/bot setup #
+###################
 if len(sys.argv) < 2:
     print("Need a path to a file with a valid token!")
     sys.exit(0)
@@ -22,10 +33,18 @@ try:
 except Exception:
     print("Point me to a proper file!")
 
-print(token)
+print(TOKEN)
+# Initialise the bot
 bot = telepot.Bot(TOKEN)
-bot.message_loop(handle)
+
+# What type of message do we have?
+bot.message_loop({'chat': on_chat_message,
+                  #'callback_query': on_callback_query,
+                  'inline_query': on_inline_query,
+                  'chosen_inline_result': on_chosen_inline_result})
+
 print("Listening, shhhh")
 
+# run forevs <3
 while 1:
     time.sleep(10)
