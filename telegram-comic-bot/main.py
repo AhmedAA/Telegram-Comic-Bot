@@ -1,26 +1,40 @@
-import telepot
 import sys
+import asyncio
+import telepot
 import os
 import time
+from telepot.async.delegate import per_inline_from_id, create_open
 
 from pprint import pprint
 
-def on_chat_message(msg):
-    pprint(msg)
-    print(msg['from']['id'])
-    bot.sendMessage(msg['from']['id'], "Stay a while, and listen!")
+#############################################
+#              Handler                      #
+#############################################
+class InlineHandler(telepot.async.helper.InlineUserHandler):
+    def __init__(self, seed_tuple, timeout):
+        super(InlineHandler, self).__init__(seed_tuple, timeout)
+        self._answerer = telepot.async.helper.Answerer(self.bot)
 
-def on_inline_query(msg):
-    print("inline herp derp")
+    def on_inline_query(self, msg):
+        def compute_answer():
+            query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
+            print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
 
-def on_chosen_inline_result(msg):
-    print("chosen inline herpderp")
+            articles = [{'type': 'article',
+                             'id': 'abc', 'title': query_string, 'message_text': query_string}]
+
+            return articles
+
+        self._answerer.answer(msg, compute_answer)
+
+    def on_chosen_inline_result(self, msg):
+        result_id, from_id, query_string = telepot.glance(msg, flavor='chosen_inline_result')
+        print(self.id, ':', 'Chosen Inline Result:', result_id, from_id, query_string)
 
 
-
-###################
-# token/bot setup #
-###################
+#############################################
+#              token/bot setup              #
+#############################################
 if len(sys.argv) < 2:
     print("Need a path to a file with a valid token!")
     sys.exit(0)
@@ -35,16 +49,14 @@ except Exception:
 
 print(TOKEN)
 # Initialise the bot
-bot = telepot.Bot(TOKEN)
+bot = telepot.async.DelegatorBot(TOKEN, [(
+    per_inline_from_id(),
+    create_open(InlineHandler, timeout=10),
+)])
+loop = asyncio.get_event_loop()
 
-# What type of message do we have?
-bot.message_loop({'chat': on_chat_message,
-                  #'callback_query': on_callback_query,
-                  'inline_query': on_inline_query,
-                  'chosen_inline_result': on_chosen_inline_result})
-
-print("Listening, shhhh")
+loop.create_task(bot.message_loop())
+print('Listening, shhhh')
 
 # run forevs <3
-while 1:
-    time.sleep(10)
+loop.run_forever()
