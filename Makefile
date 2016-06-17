@@ -1,5 +1,5 @@
 build:
-	docker build -t telebot .
+	docker build -t mjaaa/telebot .
 
 run:
-	docker run -i -t telebot python /home/docker-py/telegram-comic-bot/main.py /home/docker-py/keys/key.txt
+	docker run -v /src -ti mjaaa/telebot python telegram-comic-bot/main.py keys/key.txt

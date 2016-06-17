@@ -1,8 +1,7 @@
 FROM python:3.5.1
 
-RUN mkdir /home/docker-py
+ADD /src/requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
 
-COPY /src /home/docker-py
-RUN pip install -r /home/docker-py/requirements.txt
-
-WORKDIR /home/docker-py
+ADD /src /code
+WORKDIR /code
