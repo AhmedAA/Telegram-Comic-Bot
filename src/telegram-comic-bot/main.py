@@ -3,6 +3,7 @@ import asyncio
 import telepot
 import os
 import time
+import comicvine
 from telepot.async.delegate import per_inline_from_id, create_open
 
 from pprint import pprint
@@ -35,8 +36,8 @@ class InlineHandler(telepot.async.helper.InlineUserHandler):
 #############################################
 #              token/bot setup              #
 #############################################
-if len(sys.argv) < 2:
-    print("Need a path to a file with a valid token!")
+if len(sys.argv) < 3:
+    print("Need a path to a file with valid tokens!")
     sys.exit(0)
 
 token_path = sys.argv[1]
