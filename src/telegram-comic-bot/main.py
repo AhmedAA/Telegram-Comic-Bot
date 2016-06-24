@@ -4,25 +4,28 @@ import telepot
 import os
 import time
 import comicvine
-from telepot.async.delegate import per_inline_from_id, create_open
+
+from telepot.delegate import per_inline_from_id, create_open
 
 from pprint import pprint
 
 #############################################
 #              Handler                      #
 #############################################
-class InlineHandler(telepot.async.helper.InlineUserHandler):
+class InlineHandler(telepot.helper.UserHandler):
     def __init__(self, seed_tuple, timeout):
-        super(InlineHandler, self).__init__(seed_tuple, timeout)
-        self._answerer = telepot.async.helper.Answerer(self.bot)
+        super(InlineHandler, self).__init__(seed_tuple, timeout, flavors=['inline_query', 'chosen_inline_result'])
+        self._answerer = telepot.helper.Answerer(self.bot)
 
     def on_inline_query(self, msg):
-        def compute_answer():
-            query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
-            print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
+        query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
+        print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
 
+        def compute_answer():
             articles = [{'type': 'article',
                              'id': 'abc', 'title': query_string, 'message_text': query_string}]
+
+            comicvine.queryAll(query_string)
 
             return articles
 
@@ -50,14 +53,13 @@ except Exception:
 
 print(TOKEN)
 # Initialise the bot
-bot = telepot.async.DelegatorBot(TOKEN, [(
+bot = telepot.DelegatorBot(TOKEN, [(
     per_inline_from_id(),
-    create_open(InlineHandler, timeout=10),
-)])
-loop = asyncio.get_event_loop()
+    create_open(InlineHandler,
+                timeout=10)),
+])
 
-loop.create_task(bot.message_loop())
 print('Listening, shhhh')
 
 # run forevs <3
-loop.run_forever()
+bot.message_loop(run_forever=True)
