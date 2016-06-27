@@ -22,11 +22,28 @@ class InlineHandler(telepot.helper.UserHandler):
         print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
 
         def compute_answer():
-            articles = [{'type': 'article',
-                             'id': 'abc', 'title': query_string, 'message_text': query_string}]
+            count = 0
+            articles = []
+            characters =  comicvine.queryAll( query_string )
+            for character in characters[:50]:
+                try:
+                    count += 1
+                    article = {
+                        'type': 'article',
+                        'id': str(count),
+                        'title': character['name'],
+                        'thumb_url': character['image']['medium_url'],
+                        'description': character['deck'][:199],
+                        'parse_mode': 'Markdown',
+                        'message_text': character['deck'][:450],
+                            # "[#{character['name']}](#{character['image']['medium_url']})\n" \
+                            # "#{character['deck'][0, 450][0..-2]}...\n" \
+                            # "[Checkout more here](#{character['site_detail_url']})",
+                        }
 
-            comicvine.queryAll(query_string)
-
+                    articles.append( article );
+                except:
+                    next
             return articles
 
         self._answerer.answer(msg, compute_answer)
@@ -56,8 +73,8 @@ print(TOKEN)
 bot = telepot.DelegatorBot(TOKEN, [(
     per_inline_from_id(),
     create_open(InlineHandler,
-                timeout=10)),
-])
+                timeout=10))
+                ])
 
 print('Listening, shhhh')
 
