@@ -35,10 +35,10 @@ class InlineHandler(telepot.helper.UserHandler):
                         'thumb_url': character['image']['medium_url'],
                         'description': character['deck'][:199],
                         'parse_mode': 'Markdown',
-                        'message_text': character['deck'][:450],
-                            # "[#{character['name']}](#{character['image']['medium_url']})\n" \
-                            # "#{character['deck'][0, 450][0..-2]}...\n" \
-                            # "[Checkout more here](#{character['site_detail_url']})",
+                        'message_text':
+                            "[%s](%s)\n%s...\n[Checkout more here](%s)" % (character['name'],
+                                character['image']['medium_url'], character['deck'][:450][:-2],
+                                character['site_detail_url']),
                         }
 
                     articles.append( article );
