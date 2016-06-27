@@ -60,11 +60,11 @@ def queryAll ( charName ):
 
 def getFromRedis( charName ):
     r = redis.StrictRedis(host=ip, port=6379, db=0)
-    retreived = r.get(charName)
-    if (not retreived or type(retreived) == bytes or len(retreived) < 1):
+    retrieved = r.get(charName)
+    if (not retrieved):
         return []
     print("Retreiving from Redis")
-    return json.loads( r.get(charName) )
+    return json.loads( retrieved.decode('utf-8') )
 
 
 def putInRedis( charName, jsonObject ):

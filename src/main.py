@@ -19,6 +19,8 @@ class InlineHandler(telepot.helper.UserHandler):
 
     def on_inline_query(self, msg):
         query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
+        if len(query_string) < 3:
+            return
         print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
 
         def compute_answer():

@@ -4,3 +4,6 @@ bot:
 
 redis:
 	docker-compose up -d
+
+clean:
+	docker exec -it telegramcomicbot_redis_1 /bin/bash -c 'redis-cli select 0; redis-cli flushdb'
