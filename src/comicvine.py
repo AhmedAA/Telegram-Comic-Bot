@@ -2,6 +2,8 @@ import sys
 import json
 import requests
 import redis
+import Levenshtein
+
 from math import pow
 from time import sleep
 
@@ -29,7 +31,7 @@ def queryAll ( charName ):
     characters = getFromRedis(charName)
     if not (characters):
 
-        params = {'format': 'json', 'limit': '50', 'query': charName}
+        params = {'format': 'json', 'query': charName}
         r = __restCall(params)
 
         # print('PRINTING:')
@@ -46,12 +48,14 @@ def queryAll ( charName ):
                     and k.get('publisher')     and len( k.get('publisher') ) > 2
                     and k.get('resource_type') and len( k.get('resource_type') ) > 2
                     and k.get('deck')          and len( k.get('deck') ) > 2
+                    and k.get('name')          and len( k.get('name') ) > 2
         ]
 
-        #sort characters on name with levenstein
+        #sort characters on name with levenshtein
+        characters = sorted(characters, key=lambda k: Levenshtein.distance(charName, k['name']))
 
         putInRedis(charName, characters)
-    print(type(characters))
+    #print(type(characters))
     return characters
 
 def getFromRedis( charName ):
