@@ -75,7 +75,7 @@ print(TOKEN)
 bot = telepot.DelegatorBot(TOKEN, [(
     per_inline_from_id(),
     create_open(InlineHandler,
-                timeout=10))
+                timeout=30))
                 ])
 
 print('Listening, shhhh')
