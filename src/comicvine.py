@@ -45,18 +45,29 @@ def queryAll ( charName ):
                     for k
                     in characters
                     if k.get('description')    and len( k.get('description') ) > 2
-                    and k.get('publisher')     and len( k.get('publisher') ) > 2
-                    and k.get('resource_type') and len( k.get('resource_type') ) > 2
+                    and k.get('publisher')
+                    and k.get('resource_type')
                     and k.get('deck')          and len( k.get('deck') ) > 2
                     and k.get('name')          and len( k.get('name') ) > 2
+
         ]
 
         #sort characters on name with levenshtein
-        characters = sorted(characters, key=lambda k: Levenshtein.distance(charName, k['name']))
+        characters = sorted(characters, key=lambda k: characterSort( charName, k ))
 
         putInRedis(charName, characters)
-    #print(type(characters))
     return characters
+
+def characterSort( key, character ):
+    length = Levenshtein.distance(key, character['name'])
+    if character.get('real_name'):
+        n = Levenshtein.distance(key, character['real_name'])
+        length = n if n < length else length
+    if character.get('aliases'):
+        for alias in character['aliases'].split():
+            n = Levenshtein.distance(key, alias)
+            length = n if n < length else length
+    return length
 
 def getFromRedis( charName ):
     r = redis.StrictRedis(host=ip, port=6379, db=0)
