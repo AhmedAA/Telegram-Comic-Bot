@@ -1,15 +1,20 @@
 redis:
+	-docker stop mjaaadis
+	-docker rm mjaaadis
 	docker run -th mjaaadis --name mjaaadis -d redis
 
+ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
 start:
-	docker run -w /home/comicbot/telegram -v ~/code/Telegram-Comic-Bot:/home/comicbot/telegram \
-	--link mjaaadis:redis -it python:3 /bin/bash \
+	-docker rm mjaaabot
+	docker run -w /home/comicbot/telegram -v $(ROOT_DIR):/home/comicbot/telegram \
+	--link mjaaadis:redis -it --name mjaaabot python:3 /bin/bash \
 	-c "pip install -r requirements.txt; /bin/bash"
 
 run:
 	python ./src/main.py ./keys/key.txt ./keys/cv.txt
 
 clean:
-	docker stop mjaaadis
-	docker rm mjaaadis
-	docker rm $$(docker ps -aq -f="ancestor=python:3")
+	-docker stop mjaaadis
+	-docker rm mjaaadis
+	-docker rm mjaaabot
