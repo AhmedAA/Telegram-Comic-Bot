@@ -10,7 +10,6 @@ from time import sleep
 try:
     with open(sys.argv[2]) as f:
         TOKEN = f.read().splitlines()[0]
-    ip = sys.argv[3]
 except Exception:
     print("Point me to a proper file!")
 
@@ -70,7 +69,7 @@ def characterSort( key, character ):
     return length
 
 def getFromRedis( charName ):
-    r = redis.StrictRedis(host=ip, port=6379, db=0)
+    r = redis.StrictRedis(host="redis", port=6379, db=0)
     retrieved = r.get(charName)
     if (not retrieved):
         return []
@@ -81,5 +80,5 @@ def getFromRedis( charName ):
 def putInRedis( charName, jsonObject ):
     print("Inserting into Redis")
     local = jsonObject
-    r = redis.StrictRedis(host=ip, port=6379, db=0)
+    r = redis.StrictRedis(host="redis", port=6379, db=0)
     r.set(charName, json.dumps(local))
