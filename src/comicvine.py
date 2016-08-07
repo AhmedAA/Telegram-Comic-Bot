@@ -13,7 +13,7 @@ try:
 except Exception:
     print("Point me to a proper file!")
 
-BASE = 'http://comicvine.gamespot.com/api/search/?api_key='+ TOKEN
+BASE = 'http://comicvine.gamespot.com/api/search/?api_key=' + TOKEN
 HEADERS = {'User-Agent': 'telegram-bot'}
 
 def __restCall (params):

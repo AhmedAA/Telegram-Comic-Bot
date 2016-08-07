@@ -14,6 +14,9 @@ start:
 run:
 	python ./src/main.py ./keys/key.txt ./keys/cv.txt
 
+populate:
+	python ./src/populate_redis.py ./src/hero_list.txt ./keys/cv.txt
+
 clean:
 	-docker stop mjaaadis
 	-docker rm mjaaadis
