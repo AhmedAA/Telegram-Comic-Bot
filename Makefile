@@ -6,6 +6,7 @@ redis:
 ROOT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 
 start:
+	-docker stop mjaaabot
 	-docker rm mjaaabot
 	docker run -w /home/comicbot/telegram -v $(ROOT_DIR):/home/comicbot/telegram \
 	--link mjaaadis:redis -it --name mjaaabot python:3 /bin/bash \
@@ -15,7 +16,7 @@ run:
 	python ./src/main.py ./keys/key.txt ./keys/cv.txt
 
 populate:
-	python ./src/populate_redis.py ./src/hero_list.txt ./keys/cv.txt
+	python ./src/populate_full.py ./src/hero_list.txt ./keys/cv.txt
 
 clean:
 	-docker stop mjaaadis
