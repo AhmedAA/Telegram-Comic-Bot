@@ -38,8 +38,10 @@ class InlineHandler(telepot.helper.UserHandler):
                         'description': character['deck'][:199],
                         'parse_mode': 'Markdown',
                         'message_text':
-                            "[%s](%s)\n%s...\n[Checkout more here](%s)" % (character['name'],
-                                character['image']['medium_url'], character['deck'][:450][:-2],
+                            "[%s](%s)\n%s...\n[Checkout more here](%s)" % (
+                                character['name'],
+                                character['image']['medium_url'],
+                                character['deck'][:450][:-2],
                                 character['site_detail_url']),
                         }
 

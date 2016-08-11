@@ -3,6 +3,7 @@ import json
 import requests
 import redis
 import Levenshtein
+import datetime
 
 from math import pow
 from time import sleep
@@ -29,14 +30,10 @@ def __restCall (params):
 def queryAll ( charName ):
     characters = getFromRedis(charName)
     if not (characters):
+        print("INFO: Calling ComicVine API", datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
 
         params = {'format': 'json', 'query': charName}
         r = __restCall(params)
-
-        # print('PRINTING:')
-        # print(params)
-        # print(r.url)
-        # print(r.status_code)
 
         characters = json.loads(r.text)['results']
 
@@ -50,14 +47,16 @@ def queryAll ( charName ):
                     and k.get('name')          and len( k.get('name') ) > 2
 
         ]
-
-        #sort characters on name with levenshtein
-        characters = sorted(characters, key=lambda k: characterSort( charName, k ))
-
         putInRedis(charName, characters)
+
+    #sort characters on name with levenshtein
+    print("INFO: Sorting results", datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
+    characters = sorted(characters, key=lambda k: (characterNameSort( charName, k ), characterIssueSort( k )))
+
+    print("INFO: Returning results", datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
     return characters
 
-def characterSort( key, character ):
+def characterNameSort( key, character ):
     length = Levenshtein.distance(key, character['name'])
     if character.get('real_name'):
         n = Levenshtein.distance(key, character['real_name'])
@@ -68,17 +67,22 @@ def characterSort( key, character ):
             length = n if n < length else length
     return length
 
+def characterIssueSort( character ):
+    if (character.get('count_of_issue_appearances')):
+        return 1 - character.get('count_of_issue_appearances')
+    return 0
+
 def getFromRedis( charName ):
     r = redis.StrictRedis(host="redis", port=6379, db=0)
     retrieved = r.get(charName)
     if (not retrieved):
         return []
-    print("Retreiving from Redis")
+    print("INFO: Retreiving from Redis", datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
     return json.loads( retrieved.decode('utf-8') )
 
 
 def putInRedis( charName, jsonObject ):
-    print("Inserting into Redis")
+    print("INFO: Inserting into Redis", datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
     local = jsonObject
     r = redis.StrictRedis(host="redis", port=6379, db=0)
     r.set(charName, json.dumps(local))
