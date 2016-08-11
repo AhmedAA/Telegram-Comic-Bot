@@ -1,17 +1,14 @@
 import sys
 import json
 import requests
-import datetime
-import redis
+import time
+import progressbar
+from pymongo import MongoClient
 
 from math import pow
-from time import sleep
 
-try:
-    with open(sys.argv[2]) as f:
-        TOKEN = f.read().splitlines()[0]
-except Exception:
-    print("Point me to a proper file!")
+with open(sys.argv[1]) as f:
+    TOKEN = f.read().splitlines()[0]
 
 def request( resource, offset=0 ) :
     base = 'http://comicvine.gamespot.com/api/'+ resource +'/?api_key=' + TOKEN
@@ -23,45 +20,48 @@ def request( resource, offset=0 ) :
             r = requests.get(url=base, params=params, headers=headers)
             return r
         except:
-            sleep(min(15, pow(2, attempt)) * 5) #5, 10, 20, 40, 75 secs
+            time.sleep(min(15, pow(2, attempt)) * 5) #5, 10, 20, 40, 75 secs
         else:
             break
 
-print("CHARACTERS:")
+# print("CHARACTERS:")
 
-r = request( 'characters' )
-total = json.loads(r.text)['number_of_total_results']
-offset = 0
-names = []
-while offset <= total:
-    r = request( 'characters',  offset)
-    characters = json.loads(r.text)['results']
-    offset += json.loads(r.text)['number_of_page_results']
-    print(len(characters), offset, total)
+# r = request( 'characters' )
+# total = json.loads(r.text)['number_of_total_results']
+# offset = 0
+# bar = progressbar.ProgressBar(max_value=total)
+# while offset < total:
+#     r = request( 'characters',  offset)
+#     characters = json.loads(r.text)['results']
+#     offset += json.loads(r.text)['number_of_page_results']
+#     bar.update(offset)
 
-    characters = [k
-                for k
-                in characters
-                if k.get('description')    and len( k.get('description') ) > 2
-                and k.get('publisher')
-                and k.get('deck')          and len( k.get('deck') ) > 2
-                and k.get('name')          and len( k.get('name') ) > 2
-    ]
-    for character in characters:
-        names.append(character.get('name'))
-        r = redis.StrictRedis(host="redis", port=6379, db=0)
-        r.set(character.get('name'), json.dumps(character))
+#     characters = [k
+#                 for k
+#                 in characters
+#                 if k.get('description')    and len( k.get('description') ) > 2
+#                 and k.get('publisher')
+#                 and k.get('deck')          and len( k.get('deck') ) > 2
+#                 and k.get('name')          and len( k.get('name') ) > 2
+#     ]
+
+    if (len(teams) > 0) :
+    #     client = MongoClient("mongodb://mongo:27017")
+    #     db = client.comics
+    #     result = db.characters.insert_many( characters , False)
+
 
 print("TEAMS:")
 
 r = request( 'teams' )
 total = json.loads(r.text)['number_of_total_results']
 offset = 0
-while offset <= total:
+bar = progressbar.ProgressBar(max_value=total)
+while offset < total:
     r = request( 'teams',  offset)
     teams = json.loads(r.text)['results']
     offset += json.loads(r.text)['number_of_page_results']
-    print(len(teams), offset, total)
+    bar.update(offset)
 
     teams = [k
                 for k
@@ -71,21 +71,23 @@ while offset <= total:
                 and k.get('deck')          and len( k.get('deck') ) > 2
                 and k.get('name')          and len( k.get('name') ) > 2
     ]
-    for team in teams:
-        names.append(team.get('name'))
-        r = redis.StrictRedis(host="redis", port=6379, db=0)
-        r.set(team.get('name'), json.dumps(teams))
+
+    if (len(teams) > 0) :
+        client = MongoClient("mongodb://mongo:27017")
+        db = client.comics
+        result = db.teams.insert_many( teams , False)
 
 print("STORY ARCS:")
 
 r = request( 'story_arcs' )
 total = json.loads(r.text)['number_of_total_results']
 offset = 0
-while offset <= total:
+bar = progressbar.ProgressBar(max_value=total)
+while offset < total:
     r = request( 'story_arcs',  offset)
     story_arcs = json.loads(r.text)['results']
     offset += json.loads(r.text)['number_of_page_results']
-    print(len(story_arcs), offset, total)
+    bar.update(offset)
 
     story_arcs = [k
                 for k
@@ -95,12 +97,8 @@ while offset <= total:
                 and k.get('deck')          and len( k.get('deck') ) > 2
                 and k.get('name')          and len( k.get('name') ) > 2
     ]
-    for arc in story_arcs:
-        names.append(arc.get('name'))
-        r = redis.StrictRedis(host="redis", port=6379, db=0)
-        r.set(arc.get('name'), json.dumps(story_arcs))
 
-
-print(len(names))
-r = redis.StrictRedis(host="redis", port=6379, db=0)
-r.set('names', json.dumps(names))
+    if (len(story_arc) > 0) :
+        client = MongoClient("mongodb://mongo:27017")
+        db = client.comics
+        result = db.storyarcs.insert_many( story_arcs , False)
