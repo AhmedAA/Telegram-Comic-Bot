@@ -3,7 +3,7 @@ import asyncio
 import telepot
 import os
 import time
-import comicvine_new as comicvine
+import comicvine
 
 from telepot.delegate import per_inline_from_id, create_open
 
