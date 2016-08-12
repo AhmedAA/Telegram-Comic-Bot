@@ -38,7 +38,11 @@ populate:
 	python ./src/populate_redis.py ./src/hero_list.txt ./keys/cv.txt
 
 populate-full:
-	python ./src/populate_full.py ./keys/cv.txt
+	-docker stop mjaaabot
+	-docker run -w /home/comicbot/telegram -v $(ROOT_DIR):/home/comicbot/telegram \
+	--link mjaaango:mongo -td --name mjaaabot python:3 /bin/bash
+	docker start mjaaabot
+	docker exec -it mjaaabot bash -c "pip install -r requirements.txt; python ./src/populate_full.py ./keys/cv.txt"
 
 clean:
 	-docker stop mjaaango

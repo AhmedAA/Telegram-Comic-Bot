@@ -24,31 +24,32 @@ def request( resource, offset=0 ) :
         else:
             break
 
-# print("CHARACTERS:")
+print("CHARACTERS:")
 
-# r = request( 'characters' )
-# total = json.loads(r.text)['number_of_total_results']
-# offset = 0
-# bar = progressbar.ProgressBar(max_value=total)
-# while offset < total:
-#     r = request( 'characters',  offset)
-#     characters = json.loads(r.text)['results']
-#     offset += json.loads(r.text)['number_of_page_results']
-#     bar.update(offset)
+r = request( 'characters' )
+total = json.loads(r.text)['number_of_total_results']
+offset = 0
+bar = progressbar.ProgressBar(max_value=total)
+while offset < total:
+    r = request( 'characters',  offset)
+    characters = json.loads(r.text)['results']
+    offset += json.loads(r.text)['number_of_page_results']
+    bar.update(offset)
 
-#     characters = [k
-#                 for k
-#                 in characters
-#                 if k.get('description')    and len( k.get('description') ) > 2
-#                 and k.get('publisher')
-#                 and k.get('deck')          and len( k.get('deck') ) > 2
-#                 and k.get('name')          and len( k.get('name') ) > 2
-#     ]
+    characters = [k
+                for k
+                in characters
+                if k.get('description')    and len( k.get('description') ) > 2
+                and k.get('publisher')
+                and k.get('deck')          and len( k.get('deck') ) > 2
+                and k.get('name')          and len( k.get('name') ) > 2
+    ]
 
-    if (len(teams) > 0) :
-    #     client = MongoClient("mongodb://mongo:27017")
-    #     db = client.comics
-    #     result = db.characters.insert_many( characters , False)
+    for character in characters:
+        character['_id'] = character.get('id')
+        client = MongoClient("mongodb://mongo:27017")
+        db = client.comics
+        result = db.characters.insert_one( character)
 
 
 print("TEAMS:")
@@ -72,10 +73,11 @@ while offset < total:
                 and k.get('name')          and len( k.get('name') ) > 2
     ]
 
-    if (len(teams) > 0) :
+    for team in teams:
+        team['_id'] = team.get('id')
         client = MongoClient("mongodb://mongo:27017")
         db = client.comics
-        result = db.teams.insert_many( teams , False)
+        result = db.teams.insert_one( team)
 
 print("STORY ARCS:")
 
@@ -98,7 +100,8 @@ while offset < total:
                 and k.get('name')          and len( k.get('name') ) > 2
     ]
 
-    if (len(story_arc) > 0) :
+    for story_arc in story_arcs:
+        story_arc['_id'] = story_arc.get('id')
         client = MongoClient("mongodb://mongo:27017")
         db = client.comics
-        result = db.storyarcs.insert_many( story_arcs , False)
+        result = db.storyarc.insert_one( story_arc)
