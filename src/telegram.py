@@ -23,11 +23,18 @@ class InlineHandler(telepot.helper.UserHandler):
             return
         print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
 
+        if (query_string == 'Test'):
+            self._answerer.answer(msg, [{
+                'type': 'article',
+                'id': '0',
+                'title': 'Search narrowed down to just Characters'
+            }])
+            return
+
         def compute_answer():
             count = 0
             articles = []
-            characters =  comicvine.queryAll( query_string )
-            for character in characters[:50]:
+            for character in comicvine.queryAll(query_string)[:50]:
                 try:
                     count += 1
                     article = {
@@ -36,13 +43,16 @@ class InlineHandler(telepot.helper.UserHandler):
                         'title': character['name'],
                         'thumb_url': character['image']['medium_url'],
                         'description': character['deck'][:199],
-                        'parse_mode': 'Markdown',
-                        'message_text':
-                            "[%s](%s)\n%s...\n[Checkout more here](%s)" % (
-                                character['name'],
-                                character['image']['medium_url'],
-                                character['deck'][:450][:-2],
-                                character['site_detail_url']),
+                        'input_message_content': {
+                            'parse_mode': 'Markdown',
+                            'message_text':
+                                "[%s](%s)\n%s...\n[Checkout more here](%s)" % (
+                                    character['name'],
+                                    character['image']['medium_url'],
+                                    character['deck'][:1000],
+                                    character['site_detail_url'])
+                            },
+                        'url': character['site_detail_url']
                         }
 
                     articles.append( article );
@@ -51,6 +61,7 @@ class InlineHandler(telepot.helper.UserHandler):
             return articles
 
         self._answerer.answer(msg, compute_answer)
+        return
 
     def on_chosen_inline_result(self, msg):
         result_id, from_id, query_string = telepot.glance(msg, flavor='chosen_inline_result')
@@ -81,6 +92,5 @@ bot = telepot.DelegatorBot(TOKEN, [(
                 ])
 
 print('Listening, shhhh')
-
 # run forevs <3
 bot.message_loop(run_forever=True)
