@@ -10,6 +10,8 @@ from math import pow
 with open(sys.argv[1]) as f:
     TOKEN = f.read().splitlines()[0]
 
+mongoconn = "mongodb://objective-telegrambot-4069108:27017"
+
 def request( resource, offset=0 ) :
     base = 'http://comicvine.gamespot.com/api/'+ resource +'/?api_key=' + TOKEN
     headers = {'User-Agent': 'telegram-bot'}
@@ -20,6 +22,7 @@ def request( resource, offset=0 ) :
             r = requests.get(url=base, params=params, headers=headers)
             return r
         except:
+            print("sleeping, then trying again later")
             time.sleep(min(15, pow(2, attempt)) * 5) #5, 10, 20, 40, 75 secs
         else:
             break
@@ -47,7 +50,7 @@ while offset < total:
 
     for character in characters:
         character['_id'] = character.get('id')
-        client = MongoClient("mongodb://mongo:27017")
+        client = MongoClient(mongoconn)
         db = client.comics
         result = db.characters.insert_one( character)
 
@@ -75,7 +78,7 @@ while offset < total:
 
     for team in teams:
         team['_id'] = team.get('id')
-        client = MongoClient("mongodb://mongo:27017")
+        client = MongoClient(mongoconn)
         db = client.comics
         result = db.teams.insert_one( team)
 
@@ -102,6 +105,6 @@ while offset < total:
 
     for story_arc in story_arcs:
         story_arc['_id'] = story_arc.get('id')
-        client = MongoClient("mongodb://mongo:27017")
+        client = MongoClient(mongoconn)
         db = client.comics
         result = db.storyarc.insert_one( story_arc)

@@ -1,34 +1,21 @@
 import sys
-import asyncio
 import telepot
 import os
 import time
 import comicvine
 
-from telepot.delegate import per_inline_from_id, create_open
-
-from pprint import pprint
+from telepot.delegate import per_inline_from_id, create_open, pave_event_space
 
 #############################################
 #              Handler                      #
 #############################################
-class InlineHandler(telepot.helper.UserHandler):
-    def __init__(self, seed_tuple, timeout):
-        super(InlineHandler, self).__init__(seed_tuple, timeout, flavors=['inline_query', 'chosen_inline_result'])
-        self._answerer = telepot.helper.Answerer(self.bot)
+class InlineHandler(telepot.helper.InlineUserHandler, telepot.helper.AnswererMixin):
+    def __init__(self, *args, **kwargs):
+        super(InlineHandler, self).__init__(*args, **kwargs)
 
     def on_inline_query(self, msg):
         query_id, from_id, query_string = telepot.glance(msg, flavor='inline_query')
         if len(query_string) < 3:
-            return
-        print(self.id, ':', 'Inline Query:', query_id, from_id, query_string)
-
-        if (query_string == 'Test'):
-            self._answerer.answer(msg, [{
-                'type': 'article',
-                'id': '0',
-                'title': 'Search narrowed down to just Characters'
-            }])
             return
 
         def compute_answer():
@@ -60,12 +47,15 @@ class InlineHandler(telepot.helper.UserHandler):
                     next
             return articles
 
-        self._answerer.answer(msg, compute_answer)
-        return
+        self.answerer.answer(msg, compute_answer)
 
     def on_chosen_inline_result(self, msg):
+        from pprint import pprint
+        pprint(msg)
         result_id, from_id, query_string = telepot.glance(msg, flavor='chosen_inline_result')
         print(self.id, ':', 'Chosen Inline Result:', result_id, from_id, query_string)
+        
+
 
 
 #############################################
@@ -85,12 +75,10 @@ except Exception:
 
 print(TOKEN)
 # Initialise the bot
-bot = telepot.DelegatorBot(TOKEN, [(
-    per_inline_from_id(),
-    create_open(InlineHandler,
-                timeout=30))
-                ])
+bot = telepot.DelegatorBot(TOKEN, [
+    pave_event_space()(
+        per_inline_from_id(), create_open, InlineHandler, timeout=30),
+])
 
-print('Listening, shhhh')
 # run forevs <3
-bot.message_loop(run_forever=True)
+bot.message_loop(run_forever='Listening ...')

@@ -1,6 +1,5 @@
 telepot
 requests
-python-levenshtein
 redis
 progressbar2
 pymongo
